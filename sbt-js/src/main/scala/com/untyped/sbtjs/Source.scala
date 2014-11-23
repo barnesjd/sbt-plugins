@@ -8,7 +8,7 @@ import com.google.javascript.jscomp.{
 }
 import sbt._
 import scala.collection.JavaConversions._
-import java.lang.StringBuilder 
+import java.lang.StringBuilder
 
 trait Source extends com.untyped.sbtgraph.Source {
 
@@ -66,11 +66,15 @@ trait Source extends com.untyped.sbtgraph.Source {
       }
 
       IO.createDirectory(new File(desJs.getParent))
-      IO.write(desJs, compiler.toSource)
+
+      val js =  if(graph.sourceMaps) compiler.toSource + "\n//# sourceMappingURL="+desMap.map(_.getName).getOrElse("")
+        else compiler.toSource
+      
+      IO.write(desJs, js)
 
       if(graph.sourceMaps) {
         val sb = new StringBuilder
-        result.sourceMap.appendTo(sb, "yo")
+        result.sourceMap.appendTo(sb, desJs.getName)
         desMap.map(f => IO.write(f, sb.toString))
       }
 
