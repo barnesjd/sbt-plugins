@@ -95,8 +95,8 @@ trait Graph {
     }
 
   /**
-   * Translates the `src` filename to a `des` filename.
-   * Returns `None' if `des` could not be determined.
+   * Translates the `src` filename to `des` filename(s).
+   * Returns `Seq.empty' if `des` could not be determined.
    * This typically occurs if `src` is outside of `sourceDir`.
    */
   def srcToDes(file: File): Seq[File] =

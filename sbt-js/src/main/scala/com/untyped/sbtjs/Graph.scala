@@ -17,7 +17,8 @@ case class Graph(
   filenameSuffix: String,
   coffeeVersion: Plugin.CoffeeVersion,
   coffeeOptions: List[CoffeeOption] = List(CoffeeOption.BARE),
-  closureOptions: ClosureOptions
+  closureOptions: ClosureOptions,
+  sourceMaps: Boolean
 ) extends com.untyped.sbtgraph.Graph {
 
   type S = com.untyped.sbtjs.Source
@@ -34,6 +35,9 @@ case class Graph(
   def srcFilenameToDesFilename(filename: String) =
     filename.replaceAll("[.](js|jsm|jsmanifest|coffee)$", filenameSuffix+".js")
 
+  def desFilenameToDesMapFilename(filename:String) =
+    filename + ".map"
+
   val pluginName = "sbt-js"
 
   def closureLogLevel: java.util.logging.Level =
@@ -44,5 +48,10 @@ case class Graph(
 
   def closureSources(a: Source): List[ClosureSource] =
     ancestors(a).flatMap(_.closureSources)
+
+  override def srcToDes(file: File): Seq[File] = super.srcToDes(file).flatMap{ f =>
+    if(sourceMaps) Seq(f, new File(desFilenameToDesMapFilename(f.getCanonicalPath)))
+    else Seq(f)
+  }
 
 }

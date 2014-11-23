@@ -2,10 +2,13 @@ package com.untyped.sbtjs
 
 import com.google.javascript.jscomp.{
   SourceFile => ClosureSource,
-  Compiler => ClosureCompiler
+  Compiler => ClosureCompiler,
+  CompilerOptions => ClosureOptions,
+  SourceMap
 }
 import sbt._
 import scala.collection.JavaConversions._
+import java.lang.StringBuilder 
 
 trait Source extends com.untyped.sbtgraph.Source {
 
@@ -13,9 +16,10 @@ trait Source extends com.untyped.sbtgraph.Source {
   type G = com.untyped.sbtjs.Graph
 
   def compile: Seq[File] = {
-    val des = this.des.headOption getOrElse (throw new Exception("Could not determine destination filename for " + src))
+    val desJs = this.des.headOption getOrElse (throw new Exception("Could not determine destination filename for " + src))
+    val desMap = this.des.lastOption
 
-    graph.log.info("Compiling %s source %s".format(graph.pluginName, des))
+    graph.log.info("Compiling %s source %s".format(graph.pluginName, desJs))
 
     val compiler = new ClosureCompiler
 
@@ -30,11 +34,22 @@ trait Source extends com.untyped.sbtgraph.Source {
     graph.log.debug("  sources:")
     mySources.foreach(x => graph.log.debug("    " + x))
 
+    val options = if(graph.sourceMaps) {
+      val name = desMap.map(_.getCanonicalPath) getOrElse (throw new Exception("Could not determine destination source map filename for " + src))
+      val opts = graph.closureOptions.clone.asInstanceOf[ClosureOptions]
+      graph.log.info("Generating map at %s".format(name))
+      opts.setSourceMapOutputPath(name)
+      opts.setSourceMapDetailLevel(SourceMap.DetailLevel.ALL)
+      opts.setSourceMapFormat(SourceMap.Format.V3)
+      opts
+    }
+    else graph.closureOptions
+
     val result =
       compiler.compile(
         myExterns,
         mySources,
-        graph.closureOptions)
+        options)
 
     val errors = result.errors.toList
     val warnings = result.warnings.toList
@@ -50,10 +65,16 @@ trait Source extends com.untyped.sbtgraph.Source {
         warnings.foreach(err => graph.log.warn(err.toString))
       }
 
-      IO.createDirectory(new File(des.getParent))
-      IO.write(des, compiler.toSource)
+      IO.createDirectory(new File(desJs.getParent))
+      IO.write(desJs, compiler.toSource)
 
-      Seq(des)
+      if(graph.sourceMaps) {
+        val sb = new StringBuilder
+        result.sourceMap.appendTo(sb, "yo")
+        desMap.map(f => IO.write(f, sb.toString))
+      }
+
+      Seq(desJs) ++ desMap
     }
   }
 

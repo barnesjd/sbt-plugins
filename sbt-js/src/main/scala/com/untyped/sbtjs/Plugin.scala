@@ -83,8 +83,8 @@ object Plugin extends sbt.Plugin {
     }
 
   def sourceGraphTask = // : Def.Initialize[Task[Graph]] =
-    (streams, sourceDirectories in js, resourceManaged in js, unmanagedSources in js, templateProperties, downloadDirectory, filenameSuffix, coffeeVersion, coffeeOptions, closureOptions) map {
-      (out, sourceDirs, targetDir, sourceFiles, templateProperties, downloadDir, filenameSuffix, coffeeVersion, coffeeOptions, closureOptions) =>
+    (streams, sourceDirectories in js, resourceManaged in js, unmanagedSources in js, templateProperties, downloadDirectory, filenameSuffix, coffeeVersion, coffeeOptions, closureOptions, sourceMaps) map {
+      (out, sourceDirs, targetDir, sourceFiles, templateProperties, downloadDir, filenameSuffix, coffeeVersion, coffeeOptions, closureOptions, sourceMaps) =>
         out.log.debug("sbt-js template properties " + templateProperties)
 
         time(out, "sourceGraphTask") {
@@ -97,7 +97,8 @@ object Plugin extends sbt.Plugin {
             filenameSuffix     = filenameSuffix,
             coffeeVersion      = coffeeVersion,
             coffeeOptions      = coffeeOptions,
-            closureOptions     = closureOptions
+            closureOptions     = closureOptions,
+            sourceMaps         = sourceMaps
           )
 
           sourceFiles.foreach(graph += _)
@@ -138,9 +139,10 @@ object Plugin extends sbt.Plugin {
       prettyPrint in js,
       strictMode in js,
       warningLevel in js,
-      compilationLevel in js
+      compilationLevel in js,
+      sourceMaps in js
     ) apply {
-      (out, variableRenamingPolicy, prettyPrint, strictMode, warningLevel, compilationLevel) =>
+      (out, variableRenamingPolicy, prettyPrint, strictMode, warningLevel, compilationLevel, sourceMaps ) =>
         val options = new ClosureOptions
 
         compilationLevel.setOptionsForCompilationLevel(options)
