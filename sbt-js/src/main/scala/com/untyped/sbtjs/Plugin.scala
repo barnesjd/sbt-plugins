@@ -27,6 +27,7 @@ object Plugin extends sbt.Plugin {
     val compilationLevel       = SettingKey[CompilationLevel]("js-compilation-level",  "Closure Compiler compilation level")
     val warningLevel           = SettingKey[WarningLevel]("js-warning-level", "Closure Compiler warning level")
     val closureOptions         = SettingKey[ClosureOptions]("js-closure-options", "Options for the Google Closure compiler")
+    val sourceMaps             = SettingKey[Boolean]("js-source-maps", "Whether to generate source maps for compiled Javascript")
   }
 
   sealed trait CoffeeVersion { def url: String }
@@ -178,6 +179,7 @@ object Plugin extends sbt.Plugin {
       variableRenamingPolicy   := VariableRenamingPolicy.LOCAL,
       prettyPrint              := false,
       strictMode               := false,
+      sourceMaps               := false,
       warningLevel             := WarningLevel.QUIET,
       compilationLevel         := CompilationLevel.SIMPLE_OPTIMIZATIONS,
       closureOptions          <<= closureOptionsSetting,
