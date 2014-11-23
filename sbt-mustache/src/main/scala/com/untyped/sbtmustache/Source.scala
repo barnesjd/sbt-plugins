@@ -30,7 +30,7 @@ case class Source(graph: Graph, src: File) extends com.untyped.sbtgraph.Source {
       data => graph.getSource(data.group(1).trim, this).compiledContent
     )
 
-  def compile: Option[File] =
+  def compile: Seq[File] =
     des map { des =>
       graph.log.info("Compiling %s source %s".format(graph.pluginName, des))
       IO.write(des, compiledContent)

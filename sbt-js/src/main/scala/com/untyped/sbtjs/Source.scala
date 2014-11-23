@@ -12,8 +12,8 @@ trait Source extends com.untyped.sbtgraph.Source {
   type S = com.untyped.sbtjs.Source
   type G = com.untyped.sbtjs.Graph
 
-  def compile: Option[File] = {
-    val des = this.des getOrElse (throw new Exception("Could not determine destination filename for " + src))
+  def compile: Seq[File] = {
+    val des = this.des.headOption getOrElse (throw new Exception("Could not determine destination filename for " + src))
 
     graph.log.info("Compiling %s source %s".format(graph.pluginName, des))
 
@@ -43,7 +43,7 @@ trait Source extends com.untyped.sbtgraph.Source {
       graph.log.error(errors.length + " errors compiling " + src + ":")
       errors.foreach(err => graph.log.error(err.toString))
 
-      None
+      Seq.empty
     } else {
       if(!warnings.isEmpty) {
         graph.log.warn(warnings.length + " warnings compiling " + src + ":")
@@ -53,7 +53,7 @@ trait Source extends com.untyped.sbtgraph.Source {
       IO.createDirectory(new File(des.getParent))
       IO.write(des, compiler.toSource)
 
-      Some(des)
+      Seq(des)
     }
   }
 

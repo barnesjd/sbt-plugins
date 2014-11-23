@@ -99,15 +99,15 @@ trait Graph {
    * Returns `None' if `des` could not be determined.
    * This typically occurs if `src` is outside of `sourceDir`.
    */
-  def srcToDes(file: File): Option[File] =
-    for {
+  def srcToDes(file: File): Seq[File] =
+    (for {
       (dir, _) <- splitSourceFile(file)
       rel      <- IO.relativize(dir, file)
     } yield {
       new File(targetDir, srcFilenameToDesFilename(rel).
           replaceAll("[.]template", "")).
           getCanonicalFile
-    }
+    }).toSeq
 
   def srcFilenameToDesFilename(filename: String): String
 
@@ -218,7 +218,7 @@ trait Graph {
     log.debug("      " + source.src)
 
     log.debug("    des:")
-    log.debug("      " + source.des.map(_.toString).getOrElse("NONE"))
+    log.debug("      " + (if(source.des.size > 0) source.des.map(_.toString) else "NONE"))
 
     log.debug("    templated?:")
     log.debug("      " + source.isTemplated)

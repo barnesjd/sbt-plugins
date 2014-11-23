@@ -22,12 +22,12 @@ case class CssSource(graph: Graph, src: File) extends Source {
   def isTemplated: Boolean =
     src.toString.contains(".template")
 
-  def compile: Option[File] = {
-    val des = this.des getOrElse (throw new Exception("Could not determine destination filename for " + src))
+  def compile: Seq[File] = {
+    val des = this.des.headOption getOrElse (throw new Exception("Could not determine destination filename for " + src))
     graph.log.info("Copying %s source %s".format(graph.pluginName, des))
 
     IO.write(des, completeRawSource)
-    Some(des)
+    Seq(des)
   }
 
   override def toString =

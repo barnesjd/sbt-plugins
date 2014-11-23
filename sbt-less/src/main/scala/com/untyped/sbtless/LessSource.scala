@@ -84,10 +84,10 @@ case class LessSource(graph: Graph, src: File) extends Source {
   def isTemplated: Boolean =
     src.toString.contains(".template")
 
-  def compile: Option[File] = {
+  def compile: Seq[File] = {
     import scala.sys.{props => SysProps}
 
-    val des = this.des getOrElse (throw new Exception("Could not determine destination filename for " + src))
+    val des = this.des.headOption getOrElse (throw new Exception("Could not determine destination filename for " + src))
 
     graph.log.info("Compiling %s source %s".format(graph.pluginName, des))
 
@@ -110,7 +110,7 @@ case class LessSource(graph: Graph, src: File) extends Source {
 
 
       Process(Seq(lessCommand, temp.getCanonicalPath, des.getCanonicalPath)).! match {
-        case 0 => Some(des)
+        case 0 => Seq(des)
         case n => sys.error("Could not compile %s source %s".format(graph.pluginName, des))
       }
     } else {
@@ -138,7 +138,7 @@ case class LessSource(graph: Graph, src: File) extends Source {
             ).toString
 
           IO.write(des, css)
-          Some(des)
+          Seq(des)
         } catch {
           case e: JavaScriptException =>
             val error   = e.getValue.asInstanceOf[Scriptable]

@@ -34,7 +34,7 @@ trait Source {
    * Failure to translate normally occurs if src
    * filename is outside srcDirectory.
    */
-  final def des: Option[File] =
+  final def des: Seq[File] =
     graph.srcToDes(src)
 
   lazy val srcDirectory: File =
@@ -59,7 +59,7 @@ trait Source {
     parents.exists(_.requiresRecompilationFor(des))
   }
 
-  def compile: Option[File]
+  def compile: Seq[File]
 
   def clean(): Unit =
     des foreach { des =>

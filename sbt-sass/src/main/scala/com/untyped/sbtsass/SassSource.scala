@@ -98,8 +98,8 @@ case class SassSource(graph: Graph, src: File) extends Source {
   def isTemplated: Boolean =
     src.toString.contains(".template")
 
-  def compile: Option[File] = {
-    val des = this.des getOrElse (throw new Exception("Could not determine destination filename for " + src))
+  def compile: Seq[File] = {
+    val des = this.des.headOption getOrElse (throw new Exception("Could not determine destination filename for " + src))
 
     graph.log.info("Compiling %s source %s".format(graph.pluginName, des))
 
@@ -119,7 +119,7 @@ case class SassSource(graph: Graph, src: File) extends Source {
       // This will try to call the sass command.
       // Sass is a gem that could be installed with `gem install sass`
       Process(Seq("sass", temp.getCanonicalPath, des.getCanonicalPath)).! match {
-        case 0 => Some(des)
+        case 0 => Seq(des)
         case n => sys.error("Could not compile %s source %s".format(graph.pluginName, des))
       }
     } else {
@@ -131,7 +131,7 @@ case class SassSource(graph: Graph, src: File) extends Source {
       val syntaxOptions = Map(":syntax" -> (":"+srcFileEnding))
       val css = handleException(renderCssFromScssFile(src, graph.compilerOptions ++: syntaxOptions))
       IO.write(des, css)
-      Some(des)
+      Seq(des)
     }
   }
 

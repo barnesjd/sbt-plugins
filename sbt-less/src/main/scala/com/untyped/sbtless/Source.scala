@@ -9,7 +9,7 @@ trait Source extends com.untyped.sbtgraph.Source {
 
   val graph: G
 
-  def compile: Option[File]
+  def compile: Seq[File]
 
   def importlessRawSource: String =
     IO.readLines(src).map { line =>
