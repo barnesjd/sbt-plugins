@@ -18,7 +18,7 @@ object Plugin extends sbt.Plugin {
     val filenameSuffix         = SettingKey[String]("js-filename-suffix", "Suffix to append to the output file names before '.js'")
     // Coffee Script options:
     val coffeeVersion          = SettingKey[CoffeeVersion]("coffee-version", "The version of the Coffeescript compiler to use")
-    val coffeeBare             = SettingKey[Boolean]("js-coffee-bare", "Whether to omit the top-level function wrappers in coffee script (default true)")
+    val coffeeBare             = SettingKey[Boolean]("js-coffee-bare", "Whether to omit the top-level function wrappers in coffee script (default false)")
     val coffeeOptions          = SettingKey[List[CoffeeOption]]("js-coffee-options", "Options for the Coffee Script compiler")
     // Closure Compiler options:
     val variableRenamingPolicy = SettingKey[VariableRenamingPolicy]("js-variable-renaming-policy", "Javascript variable renaming policy (default local only)")
@@ -35,6 +35,7 @@ object Plugin extends sbt.Plugin {
   object CoffeeVersion {
     val Coffee110 = new CoffeeVersion { val url = "org/jcoffeescript/coffee-script-1.1.0.js" }
     val Coffee161 = new CoffeeVersion { val url = "org/jcoffeescript/coffee-script-1.6.1.js" }
+    val Coffee180 = new CoffeeVersion { val url = "org/jcoffeescript/coffee-script-1.8.0.js" }
   }
 
   /** Provide quick access to the enum values in com.google.javascript.jscomp.VariableRenamingPolicy */
@@ -128,9 +129,11 @@ object Plugin extends sbt.Plugin {
     }
 
   def coffeeOptionsSetting = // : Def.Initialize[List[CoffeeOption]] =
-    (streams, coffeeBare in js) apply {
-      (out, bare) =>
-        if(bare) List(CoffeeOption.BARE) else Nil
+    (streams, coffeeBare in js, sourceMaps in js) apply {
+      (out, bare, maps) =>
+        (if(bare) List(CoffeeOption.BARE) else Nil) ++
+        (if(maps) List(CoffeeOption.SOURCE_MAPS) else Nil)
+
     }
 
   def closureOptionsSetting = // : Def.Initialize[ClosureOptions] =

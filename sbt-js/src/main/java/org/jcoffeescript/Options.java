@@ -22,7 +22,7 @@ public class Options {
     private final String javaScriptOptions;
 
     public Options(Collection<Option> options) {
-        javaScriptOptions = String.format("{bare: %b}", options.contains(Option.BARE));
+        javaScriptOptions = String.format("{bare: %b, sourceMap: %b}", options.contains(Option.BARE), options.contains(Option.SOURCE_MAPS));
     }
 
     public String toJavaScript() {

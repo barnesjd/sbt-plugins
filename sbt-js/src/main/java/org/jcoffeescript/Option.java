@@ -17,5 +17,6 @@
 package org.jcoffeescript;
 
 public enum Option {
-	BARE
+	BARE,
+    SOURCE_MAPS
 }

@@ -19,6 +19,7 @@ package org.jcoffeescript;
 import org.mozilla.javascript.Context;
 import org.mozilla.javascript.JavaScriptException;
 import org.mozilla.javascript.Scriptable;
+import org.mozilla.javascript.NativeObject;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -74,8 +75,13 @@ public class JCoffeeScriptCompiler {
             compileScope.setParentScope(globalScope);
             compileScope.put("coffeeScriptSource", compileScope, coffeeScriptSource);
             try {
-                return (String)context.evaluateString(compileScope, String.format("CoffeeScript.compile(coffeeScriptSource, %s);", options.toJavaScript()),
+                Object result = context.evaluateString(compileScope, String.format("CoffeeScript.compile(coffeeScriptSource, %s);", options.toJavaScript()),
                         "JCoffeeScriptCompiler", 0, null);
+
+                System.out.println(((NativeObject)result).get("v3SourceMap"));
+
+                String js = result instanceof String ? (String)result : ((NativeObject)result).get("js").toString();
+                return js;
             } catch (JavaScriptException e) {
                 throw new JCoffeeScriptCompileException(e);
             }

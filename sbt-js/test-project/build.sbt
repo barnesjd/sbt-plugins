@@ -27,3 +27,5 @@ seq(jsSettings : _*)
 JsKeys.filenameSuffix in Compile <<= version ("-"+_+"-min")
 
 JsKeys.sourceMaps in Compile := true
+
+JsKeys.coffeeVersion in Compile := CoffeeVersion.Coffee180
