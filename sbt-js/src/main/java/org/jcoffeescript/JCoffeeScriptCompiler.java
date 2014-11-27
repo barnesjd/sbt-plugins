@@ -29,10 +29,13 @@ import java.io.UnsupportedEncodingException;
 import java.util.Collection;
 import java.util.Collections;
 
+import scala.Tuple2;
+
 public class JCoffeeScriptCompiler {
 
     private final Scriptable globalScope;
-    private final Options options;
+    private final Collection<Option> options;
+    private final String optionsJs;
 
     public JCoffeeScriptCompiler(String compilerUrl) {
         this(compilerUrl, Collections.<Option>emptyList());
@@ -65,23 +68,31 @@ public class JCoffeeScriptCompiler {
             throw new Error(e); // This should never happen
         }
 
-        this.options = new Options(options);
+        this.options = options;
+        this.optionsJs = new Options(options).toJavaScript();
     }
 
-	public String compile (String coffeeScriptSource) throws JCoffeeScriptCompileException {
+	public Tuple2<String, String> compile (String coffeeScriptSource) throws JCoffeeScriptCompileException {
         Context context = Context.enter();
         try {
             Scriptable compileScope = context.newObject(globalScope);
             compileScope.setParentScope(globalScope);
             compileScope.put("coffeeScriptSource", compileScope, coffeeScriptSource);
             try {
-                Object result = context.evaluateString(compileScope, String.format("CoffeeScript.compile(coffeeScriptSource, %s);", options.toJavaScript()),
+                Object result = context.evaluateString(compileScope, String.format("CoffeeScript.compile(coffeeScriptSource, %s);", optionsJs),
                         "JCoffeeScriptCompiler", 0, null);
 
-                System.out.println(((NativeObject)result).get("v3SourceMap"));
+                Tuple2<String, String> tuple;
 
-                String js = result instanceof String ? (String)result : ((NativeObject)result).get("js").toString();
-                return js;
+                if(options.contains(Option.SOURCE_MAPS)) {
+                    NativeObject obj = (NativeObject)result;
+                    tuple = new Tuple2(obj.get("js").toString(), obj.get("v3SourceMap").toString());
+                }
+                else {
+                    tuple = new Tuple2((String)result, "");
+                }
+
+                return tuple;
             } catch (JavaScriptException e) {
                 throw new JCoffeeScriptCompileException(e);
             }
