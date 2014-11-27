@@ -37,7 +37,6 @@ trait Source extends com.untyped.sbtgraph.Source {
     val options = if(graph.sourceMaps) {
       val name = desMap.map(_.getCanonicalPath) getOrElse (throw new Exception("Could not determine destination source map filename for " + src))
       val opts = graph.closureOptions.clone.asInstanceOf[ClosureOptions]
-      graph.log.info("Generating map at %s".format(name))
       opts.setSourceMapOutputPath(name)
       opts.setSourceMapDetailLevel(SourceMap.DetailLevel.ALL)
       opts.setSourceMapFormat(SourceMap.Format.V3)
@@ -69,7 +68,7 @@ trait Source extends com.untyped.sbtgraph.Source {
 
       val js =  if(graph.sourceMaps) compiler.toSource + "\n//# sourceMappingURL="+desMap.map(_.getName).getOrElse("")
         else compiler.toSource
-      
+
       IO.write(desJs, js)
 
       if(graph.sourceMaps) {
