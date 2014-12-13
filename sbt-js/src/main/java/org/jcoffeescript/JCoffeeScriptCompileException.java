@@ -20,8 +20,8 @@ import org.mozilla.javascript.JavaScriptException;
 
 public class JCoffeeScriptCompileException extends Exception {
 
-    JCoffeeScriptCompileException (JavaScriptException e) {
-        super(e.getValue().toString(), e);
+    JCoffeeScriptCompileException (Exception e) {
+        super(e.toString(), e);
     }
 
 }

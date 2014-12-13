@@ -2,7 +2,7 @@ package com.untyped.sbtjs
 
 import com.google.javascript.jscomp.{ SourceFile => ClosureSource }
 import sbt._
-import org.jcoffeescript.{JCoffeeScriptCompiler, JCoffeeScriptCompileException}
+import org.jcoffeescript.{JCoffeeScriptCompilerNashorn, JCoffeeScriptCompileException}
 
 object CoffeeSource {
 
@@ -27,7 +27,7 @@ case class CoffeeSource(graph: Graph, src: File) extends Source {
     try {
       import scala.collection.JavaConversions._
       graph.log.debug("Compiling %s with Coffeescript %s and options %s".format(src, graph.coffeeVersion.url, graph.coffeeOptions))
-      new JCoffeeScriptCompiler(graph.coffeeVersion.url, graph.coffeeOptions).compile(in)
+      new JCoffeeScriptCompilerNashorn(graph.coffeeVersion.url, graph.coffeeOptions).compile(in)
     } catch {
       case exn: JCoffeeScriptCompileException =>
         sys.error("Error compiling Coffeescript: " + this.src + ": " + exn.getMessage)
